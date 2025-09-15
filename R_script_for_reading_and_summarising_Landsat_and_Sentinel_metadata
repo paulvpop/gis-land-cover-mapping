@@ -31,7 +31,7 @@ rm(landsat_meta)
 #AND IDEALLY 64 OR ABOVE, AS THE SENTINEL METADATA TILL APRIL END, 2025 IS 11.5 GB
 #WHICH TRANSLATES TO AROUND 22.6 GB IN R ENVIRONMENT
 
-#Change the directory to the Sentinel data is stored if required
+#Change the directory to where the Sentinel data is stored if required
 sentinel_meta <- fread("meta_sentinel/index.csv")
 head(sentinel_meta)
 
