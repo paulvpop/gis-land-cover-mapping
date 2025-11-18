@@ -1,4 +1,4 @@
-# Optimised workflow:
+# This is the optimised workflow for accuracy assessment after post-processing (from the step '12. Accuracy assessment')
 
 ## Accuracy assessment
 
