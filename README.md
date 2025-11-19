@@ -5,3 +5,17 @@ This is a work-in-progress and the final section (to create a unified map from t
 This study was carried out under the BIRD lab, ATREE, Bengaluru (PI: Rajkamal Goswami).
 
 Reva Thekkoot (Affiliation at the time of publication: intern, BIRD Lab, ATREE Bengaluru) and Pujan Mehta (Affiliation at the time of publication: Research Associate, Foundation for Ecological Security) provided their help in testing this workflow in their systems, and also assisted me during the workshop to teach this workflow that I had conducted on the second day of Student Conference on Conservation Science - Bengaluru 2025 (SCCS-2025; on 23rd September 2025): https://www.sccs-bng.org/workshop-2.html#btnDay1Workshop10.
+
+This workflow (especially the system-dependent sections such as FORCE
+modules) has been tested in 5 different devices with two different
+operating systems (OS) and a variety of system specifications:
+
+Desktop running Windows 10 OS (later Windows 11); Dell Precision 3660; 13th Gen Intel® Core™ i9-13900; Base speed: 2.00 GHz; 32 GB RAM; 24 cores; 32 logical processors; GPU = i) Intel® UHD Graphics 770 (Driver version: 32.0.101.6881, Driver date: 04-06-2025, DirectX version: 12 (FL 12.1), Dedicated GPU memory: upto 8.0 GB, GPU Memory: upto 15.8 GB) ii) NVIDIA T1000 8GB (Driver version: 32.0.15.7159, Driver date: 31-12-2024, DirectX version: 12 (FL 12.1), Dedicated GPU memory: upto 8.0 GB, GPU Memory: upto 23.8 GB); greater than 1.5 TB free disk space
+
+Desktop running GNU/Linux OS (Ubuntu 24.04.3 LTS; codename: noble); Dell Precision Tower 5810; Intel® Xeon® E5-1660 v4 × 16; Base speed: 3.2 GHz; 64 GiB RAM; 8 cores; 2 threads per core; 16 logical processors; GPU = NVIDIA Corporation GM206GL [Quadro M2000] (Driver Version: 575.64.03, Dedicated GPU memory: upto 4 GiB); greater than 700 GB free disk space
+
+Laptop running Windows 11 Home OS; 10th Gen Intel® Core™ i5-1035G1 CPU; Base speed: 1.0 (1.19) GHz; 8 GB RAM; 4 cores; 8 logical processors; GPU = i) Intel® UHD Graphics (Driver version: 30.0.101.2079, Driver date: 26-05-2022, DirectX version: 12 (FL 12.1), Dedicated GPU memory: NA, Shared GPU Memory: upto 3.9 GB) ii) NVIDIA GeForce MX130 (Driver version: 32.0.15.7703, Driver date: 28-07-2025, DirectX version: 12 (FL 11.0), Dedicated GPU memory: upto 2.0 GB, GPU Memory: upto 3.9 GB); Less than 1TB free disk space
+
+Laptop running GNU/Linux 6.8.0-62-generic OS (Ubuntu 24.04.2 LTS); Lenovo IdeaPad S340-14IIL; Intel® Core™ i3-1005G1 × 4; Base speed: 775 MHz; 8 GiB RAM; 2 cores; 2 threads per core; 4 logical processors; GPU = Intel® UHD Graphics (ICL GT1); greater than 1.3 TiB free disk space
+
+To post about any issues or changes you would like, post it here: https://github.com/paulvpop/gis-land-cover-mapping/issues
