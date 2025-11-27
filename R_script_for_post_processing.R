@@ -12,8 +12,7 @@
 library(raster)
 library(sf)
 
-#SKIP THE NEXT THREE STEP STEPS IF YOU ARE STARTING WITH A KML FILE
-
+#SKIP THIS STEP IF YOU ARE STARTING WITH A KML FILE
 # Add the  kmz file containing the training data to the "classified_imagery" folder
 #list the kmz files in the folder (should be just the one file with the training data)
 kmz <- list.files(pattern="*.kmz", full.names=FALSE)
@@ -21,6 +20,7 @@ kmz <- list.files(pattern="*.kmz", full.names=FALSE)
 # Create temporary directory
 temp_dir <- tempdir()
 
+#SKIP THIS STEP IF YOU ARE STARTING WITH A KML FILE
 # Unzip KMZ (this will extract the KML file inside
 unzip(kmz, exdir = temp_dir)
 
