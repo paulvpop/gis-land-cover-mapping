@@ -16,11 +16,45 @@ print("This will appear in the console and be saved to output.txt")
 # can be visibly seen by a human, instead of exactly at the point, then it can be 
 # considered as accurately predicted/classified.
 
-# We will be using the already loaded libraries terra, sf, and dplyr
-# Load necessary package 'sp' (other than 'raster'), tidyverse, and ggplot2:
+# Load necessary packages:
+library(terra)
+library(sf)
+library(dplyr)
+library(raster)
 library(sp)
 library(tidyverse)
 library(ggplot2)
+
+SKIP THE FOLLOWING STEPS IF YOU ALREADY HAVE THE OBJECT 'coordinates' in the R environment from the 'Post processing' section
+
+#Set the working directory:
+#ctrl+Shift+H or setwd("D:/GIS/LULC-SIANG/classified_imagery")
+
+#Check the current working directory (optional)
+getwd()
+
+#SKIP THIS STEP IF YOU ARE STARTING WITH A KML FILE
+# Add the  kmz file containing the training data to the "classified_imagery" folder
+#list the kmz files in the folder (should be just the one file with the training data)
+kmz <- list.files(pattern="*.kmz", full.names=FALSE)
+
+# Create temporary directory
+temp_dir <- tempdir()
+
+#SKIP THIS STEP IF YOU ARE STARTING WITH A KML FILE
+# Unzip KMZ (this will extract the KML file inside
+unzip(kmz, exdir = temp_dir)
+
+# Find the extracted KML file (or just the kml file if you're starting directly from kml)
+kml_file <- list.files(temp_dir, pattern = "\\.kml$", full.names = TRUE)
+
+# Read the KML file with sf
+data <- st_read(kml_file)
+
+# Get coordinates
+coordinates <- st_coordinates(data)
+
+SKIP TILL HERE IF YOU ALREADY HAVE THE OBJECT 'coordinates' in the R environment from the 'Post processing' section
 
 # As an input, prepare coordinates as spatial points with correct CRS (WGS84)
 pts <- st_as_sf(as.data.frame(coordinates), coords = c("X", "Y"), crs = 4326)
