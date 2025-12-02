@@ -3,6 +3,10 @@
 #Set the working directory:
 #ctrl+Shift+H or setwd("D:/GIS/LULC-SIANG/classified_imagery")
 
+#To start logging command outputs into a textfile "post_processing_output.txt"
+sink("post_processing_output.txt", split = TRUE)
+print("This will appear in the console and be saved to post_processing_output.txt")
+
 #Uncomment (remove #) the following line and Install the packages 'raster' and 
 #'sp' if not already installed. Note that you may have to install or update some
 #dependencies if the installation is not working. Check the errors/warnings. 
@@ -597,6 +601,8 @@ for (i in 1:nrow(mod_det)) {
   })
 }
 
+#Close the sink (for the txt output)
+sink()
 
 #Output:
 #==================================================
