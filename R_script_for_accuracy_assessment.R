@@ -25,7 +25,7 @@ library(sp)
 library(tidyverse)
 library(ggplot2)
 
-SKIP THE FOLLOWING STEPS IF YOU ALREADY HAVE THE OBJECT 'coordinates' in the R environment from the 'Post processing' section
+#SKIP THE FOLLOWING STEPS IF YOU ALREADY HAVE THE OBJECT 'coordinates' in the R environment from the 'Post processing' section
 
 #Set the working directory:
 #ctrl+Shift+H or setwd("D:/GIS/LULC-SIANG/classified_imagery")
@@ -54,7 +54,7 @@ data <- st_read(kml_file)
 # Get coordinates
 coordinates <- st_coordinates(data)
 
-SKIP TILL HERE IF YOU ALREADY HAVE THE OBJECT 'coordinates' in the R environment from the 'Post processing' section
+#SKIP TILL HERE IF YOU ALREADY HAVE THE OBJECT 'coordinates' in the R environment from the 'Post processing' section
 
 # As an input, prepare coordinates as spatial points with correct CRS (WGS84)
 pts <- st_as_sf(as.data.frame(coordinates), coords = c("X", "Y"), crs = 4326)
