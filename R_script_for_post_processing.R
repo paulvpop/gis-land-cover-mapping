@@ -41,7 +41,16 @@ kml_file <- list.files(temp_dir, pattern = "\\.kml$", full.names = TRUE)
 # Read the KML file with sf
 data <- st_read(kml_file)
 
-#Output in Windows: 
+#Output in Linux
+# Reading layer `2024_updated' from data source `/tmp/Rtmpw7uo9z/doc.kml' using driver `LIBKML'
+# Simple feature collection with 2358 features and 11 fields
+# Geometry type: POINT
+# Dimension:     XYZ
+# Bounding box:  xmin: 93.99069 ymin: 27.56451 xmax: 95.56589 ymax: 29.33588
+# z_range:       zmin: 0 zmax: 0
+# Geodetic CRS:  WGS 84
+
+Output in Windows: 
 # Reading layer `2024_updated' from data source 
 #   `C:\Users\GIS\AppData\Local\Temp\RtmpQPSSTT\doc.kml' using driver `KML'
 # Simple feature collection with 2358 features and 2 fields
@@ -51,9 +60,20 @@ data <- st_read(kml_file)
 # z_range:       zmin: 0 zmax: 0
 # Geodetic CRS:  WGS 84
 
+# Note that it will be XY if downloading the kml from places like Felt, where the Z axis
+# and therefore, the "z_range" will be absent from the metadata.
+
+# Output in Linux (when starting with with kml):
+# Reading layer `siang2005classification' from data source 
+#  `/home/birdlab/Pictures/force2005/Siang-points-classification-2005.kml' using driver `LIBKML'
+# Simple feature collection with 1433 features and 23 fields
+# Geometry type: POINT
+# Dimension:     XY
+# Bounding box:  xmin: 93.99069 ymin: 27.56451 xmax: 95.33115 ymax: 29.33588
+
 # Extract all raster values at once using terra 
 
-#Load the 'terra' package. We will use sf and dplyr too
+#Load the 'terra' and 'dplyr' packages. We will use sf too.
 library(terra)
 library(dplyr)
 
