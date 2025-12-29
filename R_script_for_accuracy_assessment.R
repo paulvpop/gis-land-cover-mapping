@@ -65,7 +65,7 @@ india_nsf_lcc <- st_crs(7755)  # WGS 84 / India NSF LCC
 # Ensure points are in India NSF LCC
 pts_projected <- st_transform(pts, india_nsf_lcc)
 
-SKIP THE FOLLOWING STEP IF YOU ALREADY HAVE THE OBJECT 'mod_det' in the R environment from the 'Post processing' section
+#SKIP THE FOLLOWING STEP IF YOU ALREADY HAVE THE OBJECT 'mod_det' in the R environment from the 'Post processing' section
 # Load the csv containing model details
 mod_det <- read.csv("model_details.csv")
 
