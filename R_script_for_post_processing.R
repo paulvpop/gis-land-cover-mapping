@@ -997,7 +997,7 @@ setwd("D:/GIS")
 #15    15  Sentinel   dir_ml_sent_RFC_nine        0        1           0 /home/GIS/force2
 
 # Load the csv containing model details
-mod_det <- read.csv("force/model_details5.csv")
+mod_det <- read.csv("force/model_details.csv")
 
 library(terra)
 library(stringr)
