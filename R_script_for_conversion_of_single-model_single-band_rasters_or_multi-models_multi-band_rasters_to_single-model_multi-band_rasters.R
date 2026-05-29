@@ -52,7 +52,7 @@
 setwd("D:/GIS/Multi-model-extraction")
 
 # Load the CSV file with model information
-rast <- read.csv("multi_model_raster_details.csv")
+rast <- read.csv("model_details_for_raster_restructuring.csv")
 
 # Load the necessary 'terra' library
 library(terra)
