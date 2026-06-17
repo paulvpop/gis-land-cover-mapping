@@ -89,7 +89,7 @@ dem <- rast("alos.vrt")
 # Extract elevation
 elev_vals <- terra::extract(dem, coords_vect)[, 2]  # Second column has values
 
-#Ignore these warnings if yoy get them:
+#Ignore these warnings if you get them:
 # Warning messages:
 #   1: In class(object) <- "environment" :
 #   Setting class(x) to "environment" sets attribute to NULL; result will no longer be an S4 object
