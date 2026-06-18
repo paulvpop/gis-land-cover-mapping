@@ -1,5 +1,13 @@
 # This is an optimised and minimalist workflow for post processing model prediction outputs (workflow 2 in section 11. Post processing)
 
+#*IMPORTANT: Checklist of changes needed in the script for your personal use:*
+#1) Set input directory (replace the folder path with your folder path)
+#2) Ensure that you have the kmz or kml file containing the training data (coordinates of classes) in the input directory.
+#   There should only be this kmz or kml file in that directory. Otherwise, edit the code to load in the specific kmz/kml.
+#3) A study area shapefile in the input directory with the name study_area.shp within the subfolder study_area.
+#   You can rename it and the folder name in the line under "# Mask all rasters at once"
+#4) Load the CSV file with model information (replace the file name with your file name)
+
 #Set the working directory:
 #ctrl+Shift+H or setwd("D:/GIS/LULC-SIANG/classified_imagery")
 
@@ -41,7 +49,7 @@ kml_file <- list.files(temp_dir, pattern = "\\.kml$", full.names = TRUE)
 # Read the KML file with sf
 data <- st_read(kml_file)
 
-#Output in Linux
+# Output in Linux
 # Reading layer `2024_updated' from data source `/tmp/Rtmpw7uo9z/doc.kml' using driver `LIBKML'
 # Simple feature collection with 2358 features and 11 fields
 # Geometry type: POINT
@@ -50,7 +58,7 @@ data <- st_read(kml_file)
 # z_range:       zmin: 0 zmax: 0
 # Geodetic CRS:  WGS 84
 
-Output in Windows: 
+# Output in Windows: 
 # Reading layer `2024_updated' from data source 
 #   `C:\Users\GIS\AppData\Local\Temp\RtmpQPSSTT\doc.kml' using driver `KML'
 # Simple feature collection with 2358 features and 2 fields
