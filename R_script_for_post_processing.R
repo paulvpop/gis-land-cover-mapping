@@ -1,12 +1,27 @@
 # This is an optimised and minimalist workflow for post processing model prediction outputs (workflow 2 in section 11. Post processing)
 
-#*IMPORTANT: Checklist of changes needed in the script for your personal use:*
+#IMPORTANT: Checklist of changes needed in the script for your personal use:
 #1) Set input directory (replace the folder path with your folder path)
 #2) Ensure that you have the kmz or kml file containing the training data (coordinates of classes) in the input directory.
 #   There should only be this kmz or kml file in that directory. Otherwise, edit the code to load in the specific kmz/kml.
 #3) A study area shapefile in the input directory with the name study_area.shp within the subfolder study_area.
-#   You can rename it and the folder name in the line under "# Mask all rasters at once"
+#   You can rename it and the folder name in the line under "# Mask all rasters at once".
+#  In the bulk processing section, do the same under the line "# Load the shapefile again".
 #4) Load the CSV file with model information (replace the file name with your file name)
+#5) Under the "# Pre-compute class mapping (constant)", change the abbreviation of classes to that of yours.
+
+#IMPORTANT: The C or  home drive where the terra package will create a temporary folder for putting temporary objects 
+#need to have a good amount of free space, ideally at least 50 GB of free space just to be on the safer side. Increase 
+#the free space even further if you're processing hundreds or thousands of models at the same time.  Without the free 
+#space, you will get errors like this: 
+#Error processing MGR : std::bad_alloc
+#OR
+#Processing class: SH ...
+#
+#|---------|---------|---------|---------|
+#========Error processing SH : [project] cannot write values (err: 3) 
+#Processing class: BU ...
+#Error processing BU : [project] cannot write file
 
 #Set the working directory:
 #ctrl+Shift+H or setwd("D:/GIS/LULC-SIANG/classified_imagery")
