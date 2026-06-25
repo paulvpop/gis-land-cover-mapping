@@ -23,6 +23,8 @@
 #Processing class: BU ...
 #Error processing BU : [project] cannot write file
 
+### Creation of rasters with probabilistic landscape for each class ####
+
 #Set the working directory:
 #ctrl+Shift+H or setwd("D:/GIS/LULC-SIANG/classified_imagery")
 
@@ -432,245 +434,89 @@ result_rasters <- map(setNames(unique_classes, unique_classes),
 # Remove NULL entries (classes with no significant variables)
 result_rasters <- compact(result_rasters)
 
-# The next hundred or so lines are for saving the entire result_rasters object 
-# and loading it back in the same form (difficult with spatRaster objects) 
-# if required in the future. For doing this, uncomment the following 100 or so lines -
-# select the entire commented out chunk of code commepress ctrl+shift+C:
+# The next sixty or so lines are for saving the entire result_rasters object 
+# and loading it back in the same form if required in the future (saves a lot 
+# of time). For doing this, uncomment the following 60 or so lines - select 
+# the entire commented out chunk of code and press ctrl+shift+C:
 
-# # Function to safely save SpatRaster objects
-# save_rasters_safely <- function(raster_list, filename) {
-#   # This function will save three things:
-#   # 1. The actual raster data as arrays
-#   # 2. The metadata (extent, crs, resolution)
-#   # 3. A reconstruction function
-#   
-#   cat("Preparing raster data for safe storage...\n")
-#   
-#   raster_data <- list()
+# save_rasters_to_tiff <- function(raster_list, output_dir = "rasters") {
+#   # Create output directory
+#   if (!dir.exists(output_dir)) dir.create(output_dir)
 #   
 #   for (i in seq_along(raster_list)) {
 #     name <- names(raster_list)[i]
 #     r <- raster_list[[i]]
 #     
-#     cat("Processing:", name, "\n")
+#     cat("Saving:", name, "\n")
 #     
-#     # Extract all necessary data
-#     raster_data[[name]] <- list(
-#       # Store values as a regular matrix/array
-#       values = as.matrix(r, wide = TRUE),
-#       
-#       # Store metadata as simple vectors/strings
-#       extent = as.vector(ext(r)),
-#       crs = crs(r, proj = TRUE),  # Store as PROJ string
-#       resolution = res(r),
-#       
-#       # Store basic properties
-#       nrow = nrow(r),
-#       ncol = ncol(r),
-#       nlyr = nlyr(r)
+#     # Write directly to GeoTIFF
+#     filename <- file.path(output_dir, paste0(name, ".tif"))
+#     terra::writeRaster(r, filename, overwrite = TRUE)
+#     
+#     # Also save metadata as RDS
+#     metadata <- list(
+#       filename = filename,
+#       extent = as.vector(terra::ext(r)),
+#       crs = terra::crs(r, proj = TRUE),
+#       resolution = terra::res(r),
+#       nrow = terra::nrow(r),
+#       ncol = terra::ncol(r),
+#       nlyr = terra::nlyr(r)
 #     )
+#     
+#     saveRDS(metadata, file = file.path(output_dir, paste0(name, "_metadata.rds")))
 #   }
 #   
-#   # Save the data
-#   saveRDS(raster_data, file = filename)
-#   cat("Saved to:", filename, "\n")
+#   cat("All rasters saved to:", output_dir, "\n")
 # }
 # 
-# # Function to reconstruct rasters from saved data
-# load_rasters_safely <- function(filename) {
-#   cat("Loading raster data from:", filename, "\n")
+# # Save the result_rasters
+# save_rasters_to_tiff(result_rasters, "result_rasters_tiff")
+#
+# load_rasters_from_tiff_progress <- function(output_dir = "rasters") {
+#   if (!requireNamespace("progress", quietly = TRUE)) {
+#     # Fallback if progress package not installed
+#     return(load_rasters_from_tiff(output_dir))
+#   }
 #   
-#   raster_data <- readRDS(filename)
+#   tiff_files <- list.files(output_dir, pattern = "\\.tif$", full.names = TRUE)
+#   
+#   if (length(tiff_files) == 0) {
+#     stop("No TIFF files found in directory: ", output_dir)
+#   }
+#   
 #   raster_list <- list()
 #   
-#   for (name in names(raster_data)) {
-#     cat("Reconstructing:", name, "\n")
+#   # Create progress bar
+#   pb <- progress::progress_bar$new(
+#     format = "Loading rasters [:bar] :percent :eta",
+#     total = length(tiff_files),
+#     clear = FALSE
+#   )
+#   
+#   for (tiff_file in tiff_files) {
+#     pb$tick()
 #     
-#     data <- raster_data[[name]]
-#     
-#     # Create a new SpatRaster from scratch
-#     r <- rast(
-#       nrows = data$nrow,
-#       ncols = data$ncol,
-#       nlyrs = data$nlyr,
-#       extent = ext(data$extent),
-#       crs = data$crs
-#     )
-#     
-#     # Set the values
-#     values(r) <- data$values
-#     
-#     # Set the name
-#     names(r) <- name
-#     
+#     name <- gsub("\\.tif$", "", basename(tiff_file))
+#     r <- terra::rast(tiff_file)
 #     raster_list[[name]] <- r
 #   }
 #   
+#   cat("\nLoaded", length(raster_list), "rasters\n")
 #   return(raster_list)
 # }
 # 
-# # Test with your data
-# save_rasters_safely(result_rasters, "result_rasters.rds")
-# 
-# # Preparing raster data for safe storage...
-# # Processing: AGR 
-# # Processing: AJ 
-# # Processing: BA 
-# # Processing: BU 
-# # Processing: CC 
-# # Processing: MGR 
-# # Processing: OF 
-# # Processing: SH 
-# # Processing: SN 
-# # Processing: SS 
-# # Processing: TF 
-# # Processing: WA 
-# # Processing: WRC 
-# # Saved to: result_rasters.rds 
-# 
-# # Load it back
-# loaded_safe <- load_rasters_safely("result_rasters.rds")
-# 
-# # Loading raster data from: result_rasters.rds 
-# # Reconstructing: AGR 
-# # Reconstructing: AJ 
-# # Reconstructing: BA 
-# # Reconstructing: BU 
-# # Reconstructing: CC 
-# # Reconstructing: MGR 
-# # Reconstructing: OF 
-# # Reconstructing: SH 
-# # Reconstructing: SN 
-# # Reconstructing: SS 
-# # Reconstructing: TF 
-# # Reconstructing: WA 
-# # Reconstructing: WRC 
-# 
-# # Verify
-# cat("\nVerification:\n")
-# # Verification:
-# print(loaded_safe[["AGR"]])
+# # Load them back (with progress bar)
+# result_rasters <- load_rasters_from_tiff_progress("result_rasters_tiff")
 
-# class       : SpatRaster
-# size        : 10800, 10800, 1  (nrow, ncol, nlyr)
-# resolution  : 0.0002777778, 0.0002777778  (x, y)
-# extent      : 93, 96, 27, 30  (xmin, xmax, ymin, ymax)
-# coord. ref. : +proj=longlat +datum=WGS84 +no_defs
-# source(s)   : memory
-# name        : AGR
-# min value   :   1
-# max value   :   1
-
-# # Check if values are the same
-# compare_values <- function(r1, r2, name) {
-#   v1 <- values(r1)
-#   v2 <- values(r2)
-# 
-#   cat("\nComparing", name, ":\n")
-#   cat("  Same dimensions?", identical(dim(v1), dim(v2)), "\n")
-#   cat("  All values equal?", all(v1 == v2, na.rm = TRUE), "\n")
-#   cat("  Same NA pattern?", identical(is.na(v1), is.na(v2)), "\n")
-# 
-#   # Check for any differences
-#   diff_count <- sum(v1 != v2, na.rm = TRUE)
-#   if (diff_count > 0) {
-#     cat("  WARNING:", diff_count, "values differ!\n")
-#   } else {
-#     cat("  SUCCESS: All values match!\n")
-#   }
-# }
-
-# # Compare all rasters
-# for (name in names(result_rasters)) {
-#   if (name %in% names(loaded_safe)) {
-#     compare_values(result_rasters[[name]], loaded_safe[[name]], name)
-#   }
-# }
-#
-# # Output:
-# # Comparing AGR :
-# #   Same dimensions? TRUE
-# # All values equal? TRUE
-# # Same NA pattern? TRUE
-# # SUCCESS: All values match!
-# # 
-# #   Comparing AJ :
-# #   Same dimensions? TRUE
-# # All values equal? TRUE
-# # Same NA pattern? TRUE
-# # SUCCESS: All values match!
-# # 
-# #   Comparing BA :
-# #   Same dimensions? TRUE
-# # All values equal? TRUE
-# # Same NA pattern? TRUE
-# # SUCCESS: All values match!
-# # 
-# #   Comparing BU :
-# #   Same dimensions? TRUE
-# # All values equal? TRUE
-# # Same NA pattern? TRUE
-# # SUCCESS: All values match!
-# # 
-# #   Comparing CC :
-# #   Same dimensions? TRUE
-# # All values equal? TRUE
-# # Same NA pattern? TRUE
-# # SUCCESS: All values match!
-# # 
-# #   Comparing MGR :
-# #   Same dimensions? TRUE
-# # All values equal? TRUE
-# # Same NA pattern? TRUE
-# # SUCCESS: All values match!
-# # 
-# #   Comparing OF :
-# #   Same dimensions? TRUE
-# # All values equal? TRUE
-# # Same NA pattern? TRUE
-# # SUCCESS: All values match!
-# # 
-# #   Comparing SH :
-# #   Same dimensions? TRUE
-# # All values equal? TRUE
-# # Same NA pattern? TRUE
-# # SUCCESS: All values match!
-# # 
-# #   Comparing SN :
-# #   Same dimensions? TRUE
-# # All values equal? TRUE
-# # Same NA pattern? TRUE
-# # SUCCESS: All values match!
-# # 
-# #   Comparing SS :
-# #   Same dimensions? TRUE
-# # All values equal? TRUE
-# # Same NA pattern? TRUE
-# # SUCCESS: All values match!
-# # 
-# #   Comparing TF :
-# #   Same dimensions? TRUE
-# # All values equal? TRUE
-# # Same NA pattern? TRUE
-# # SUCCESS: All values match!
-# # 
-# #   Comparing WA :
-# #   Same dimensions? TRUE
-# # All values equal? TRUE
-# # Same NA pattern? TRUE
-# # SUCCESS: All values match!
-# # 
-# #   Comparing WRC :
-# #   Same dimensions? TRUE
-# # All values equal? TRUE
-# # Same NA pattern? TRUE
-# # SUCCESS: All values match!
+### Generation of random points for validation ####
 
 # The next step is for getting independent points for validity assessment after post-processing
-# (we will revisit) We will collect random points occurring within the probability 
-# landscape for each class - that is equivalent to 30% of the training data for each 
+# (which you may do if you would like to) We will collect random points occurring within the
+# probability landscape for each class - that is equivalent to 30% of the training data for each 
 # class which will then be independently checked in Google Earth (or QGIS with relevant 
-# imagery) if they match the class or not.
+# imagery) if they match the class or not. NOTE: This is not used in the current workflow for
+# accuracy assessment.
 
 cat("\n=========================================\n")
 cat("Generating Random Points for Validation\n")
@@ -995,6 +841,8 @@ if (length(all_points) > 0) {
   cat("3. Check with: terra::unique(result_rasters[[1]])\n")
 }
 
+### Bulk post-processing of models ####
+                            
 #The next step is the beginning of bulk processing of all the models in the device. 
 
 #First, set the working directory. This directory should contain all the folders containing the models. For safety, you can keep it as the highest directory possible - home directory or D drive (if all the folders are in D drive):
@@ -1022,6 +870,10 @@ setwd("D:/GIS")
 # Load the csv containing model details
 mod_det <- read.csv("force/model_details.csv")
 
+# Load the shapefile again
+shp <- read_sf("LULC-Siang/study_area/study_area.shp")
+
+# Load necessary packages
 library(terra)
 library(stringr)
 library(sf)
@@ -1046,8 +898,8 @@ class_mapping <- c(
   "MODEL_CLASS_013" = "SS"
 )
 
-#The already loaded "shp" will be used in the following loop. Pre-reproject the 
-#shapefile ONCE for all models (since all MLPS which will be converted to VRTs will
+#The loaded "shp" will be used in the following loop. Pre-reproject the 
+#shapefile ONCE for all models (since all MLPs which will be converted to VRTs will
 #have the same CRS - EPSG:7755)
 cat("Reprojecting shapefile to EPSG:7755 for all models...\n")
 target_crs <- "EPSG:7755"
@@ -1070,6 +922,7 @@ process_with_vrt <- function(model_name) {
   dir_path <- paste0(model_info$directory,"/",model_name)
   # Clean path separators if needed
   dir_path <- gsub("\\\\", "/", dir_path)
+  dir_path <- gsub("//", "/", dir_path)
   
   cat("Processing model:", model_name, "\n")
   cat("Directory:", dir_path, "\n")
@@ -1122,9 +975,18 @@ process_with_vrt <- function(model_name) {
   
   # Setup output directory - create it within the model's directory
   output_dir <- file.path(dir_path, "processed")
+  # Use normalizePath for consistent path handling:
+  output_dir <- normalizePath(output_dir, winslash = "/", mustWork = FALSE)
+  
+  # Create directory
   if (!dir.exists(output_dir)) {
-    dir.create(output_dir, recursive = TRUE)
-    cat("Created directory:", output_dir, "\n")
+    dir.create(output_dir, recursive = TRUE, showWarnings = TRUE)
+    if (dir.exists(output_dir)) {
+      cat("Created directory:", output_dir, "\n")
+    } else {
+      warning("Failed to create directory: ", output_dir)
+      return(FALSE)
+    }
   } else {
     cat("Directory exists:", output_dir, "\n")
   }
@@ -1135,6 +997,25 @@ process_with_vrt <- function(model_name) {
   # Process each band from the VRT directly
   for (class_name in names(mosaic_vrt)) {
     cat("Processing class:", class_name, "...\n")
+
+     # Check if output file already exists AND is valid
+      output_file <- file.path(output_dir, paste0(class_name, "_processed.tif"))
+      if (file.exists(output_file)) {
+        # Additional check: does it have valid data?
+        tryCatch({
+          test_raster <- rast(output_file)
+          # Check if it has any non-zero values
+          non_zero <- global(test_raster, function(x) sum(x > 0, na.rm = TRUE))[1,1]
+          if (non_zero > 0) {
+            cat("Valid processed file exists, skipping:", class_name, "\n")
+            next
+          } else {
+            cat("File exists but contains no data, reprocessing:", class_name, "\n")
+          }
+        }, error = function(e) {
+          cat("File exists but cannot be read, reprocessing:", class_name, "\n")
+        })
+      }
     
     tryCatch({
       # Get the input raster from VRT
@@ -1149,14 +1030,12 @@ process_with_vrt <- function(model_name) {
       # Get the corresponding mask from result_rasters
       mask_band <- result_rasters[[class_name]]
       
-      # Reproject mask to match VRT band's CRS
-      mask_reproj <- project(mask_band, crs(r), method = "near", threads = threads)
-      
-      # Resample mask to match VRT band's resolution
-      mask_resam <- resample(mask_reproj, r, method = "near", threads = threads)
+      # Reproject the mask to match VRT band's CRS and resample the mask to match
+      # VRT band's resolution
+      mask_reproj <- project(mask_band, r, method = "near", threads = threads)
       
       # Create a mask where mask_band has valid values
-      valid_mask <- !is.na(mask_resam) & mask_resam != 0
+      valid_mask <- !is.na(mask_reproj) & mask_reproj != 0
       
       # Apply the mask to the VRT band
       r_masked <- r * valid_mask
@@ -1185,7 +1064,7 @@ process_with_vrt <- function(model_name) {
       cat("Successfully processed", class_name, "\n")
       
       # Clean up
-      rm(r, mask_band, mask_reproj, mask_resam, r_cropped)
+      rm(r, mask_band, mask_reproj, valid_mask, r_cropped)
       gc()
       
     }, error = function(e) {
@@ -1237,7 +1116,6 @@ sink()
 #[11] "MODEL_CLASS_012" "MODEL_CLASS_013"
 #[1] "VRT band names after class mapping:"
 # [1] "TF"  "SN"  "OF"  "CC"  "AJ"  "WRC" "SH"  "BU"  "AGR" "MGR" "WA"  "SS" 
-#Reprojecting shapefile to match VRT CRS...
 #Created directory: D:/Paul_Pop_RS_GIS_files/force/dir_sent_RFC_eight_ml/processed 
 #Processing class: TF ...
 #Non-zero pixels in TF : 95668977          
@@ -1296,7 +1174,6 @@ sink()
 #[11] "MODEL_CLASS_011" "MODEL_CLASS_012" "MODEL_CLASS_013"
 #[1] "VRT band names after class mapping:"
 # [1] "TF"  "SN"  "OF"  "BA"  "CC"  "AJ"  "WRC" "SH"  "BU"  "AGR" "MGR" "WA"  "SS" 
-#Reprojecting shapefile to match VRT CRS...
 #Created directory: D:/Paul_Pop_RS_GIS_files/force3/dir_ml_sent_RFC_pbc/processed 
 #Processing class: TF ...
 #Non-zero pixels in TF : 43186526          
