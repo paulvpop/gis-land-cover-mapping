@@ -1,4 +1,4 @@
-# Statistics aggregation of accuracy assessment
+## Statistics aggregation of accuracy assessment
 
 # This section is for combining the rows of similar classes for every model and 
 # output individual csv files for each class.
