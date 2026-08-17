@@ -1,0 +1,155 @@
+## Calculate the per strata sample size
+
+# This can be done using the force-sample-size module available in FORCe.
+# However, as a rule of thumb based on the Congalton and Green book:
+# "Assessing the Accuracy of Remotely Sensed Data: Principles and Practices,
+# 2nd edition", if the area is more than a million acres (i.e. > 10 lakh acres)
+# or there are more than 12 classes, then use the method I have implemented
+# completely in R ("Using R" subsection).
+
+# If your study area is more than a million acres or have more than 12 classes,
+# run the "Using R" section instead of the "Using FORCE" section.
+
+# NOTE THAT THE EXAMPLE OUTPUTS OF THE CODE CAN BE FOUND IN THE ONLINE DOCUMENTATION OF
+# THIS SECTION: https://github.com/paulvpop/gis-land-cover-mapping/blob/main/12.%20Accuracy%20assessment.md#calculate-the-per-strata-sample-size
+
+### Using FORCE
+
+#### Create inputs for the per strata sample size calculation in FORCE
+
+# For estimating the sample size using a FORCE modules, one of the input files is
+# a csv with the class name in one column and the number of pixels in another
+# Since our focus is on all classes, the data from the All_classes scenarios for 
+# both Landsat and Sentinel will be extracted from the all_satellite_summaries
+# created in the the last stage (only in the R environment). 
+
+# Extract the necessary data
+pixels_sentinel <- as.data.frame(cbind(all_satellite_summaries[["Sentinel"]][["Class"]], 
+                                       all_satellite_summaries[["Sentinel"]][["All_classes_avg"]]))
+
+pixels_landsat <- as.data.frame(cbind(all_satellite_summaries[["Landsat"]][["Class"]], 
+                                      all_satellite_summaries[["Landsat"]][["All_classes_avg"]]))
+
+# Add the column names specified in the force-sample-size module
+colnames(pixels_sentinel) <- c("class","count")
+colnames(pixels_landsat) <- c("class","count")
+
+# Write as csv
+write.csv(pixels_sentinel, "pixel_count_sentinel.csv", row.names = FALSE)
+write.csv(pixels_landsat, "pixel_count_landsat.csv", row.names = FALSE)
+
+# Create dummy files for the user's accuracy for both Landsat and Sentinel
+# It will contain a class column and a corresponding hypothesized/conjectured
+# user's accuracy column. Read this paper - Olofsson et al, 2014 
+# http://dx.doi.org/10.1016/j.rse.2014.02.015 to understand a bit more. 
+
+# Extract the necessary data
+UA_sentinel <- as.data.frame(cbind(all_satellite_summaries[["Sentinel"]][["Class"]], 
+                                   " "))
+
+UA_landsat <- as.data.frame(cbind(all_satellite_summaries[["Landsat"]][["Class"]], 
+                                  " "))
+
+# Add the column names specified in the force-sample-size module
+colnames(UA_sentinel) <- c("class","UA")
+colnames(UA_landsat) <- c("class","UA")
+
+# Write as csv
+write.csv(UA_sentinel, "UA_sentinel.csv", row.names = FALSE)
+write.csv(UA_landsat, "UA_landsat.csv", row.names = FALSE)
+
+# The potential user's accuracy can be entered for each class based on i) expert 
+# prior knowledge based on experience on working on same or similar classes in the 
+# same type or similar type of habitats/landscapes ii) based on published literature
+# for the same iii) doing a trial run of the accuracy metrics with training data 
+# (but it can provide false information as the data used for the estimation of 
+# the accuracy metrics (user's accuracy in this case) is not independent from the 
+# training data) or iv) a combination of the above
+
+# If using iii), finish the "accuracy assessment" section, and then come back to this
+# location. The following script will find and out the user's accuracy csv file
+# file necessary for the force-sample-size module after averaging the precision 
+# (which is the same as user's accuracy) for the models used in the pixel counting
+# stage (or the statistics aggregation stage if the pixel counting was done in
+# multiple systems). The rest of the section requires that the "accuracy assessment"
+# has been done already.
+
+# Set the working directory
+setwd("D:/RS_GIS_files")
+# OR use ctrl+shift+H
+
+sent_all <- read.csv("LULC-SIANG/pixel_count_merged/Sentinel_All_classes_counts.csv")
+land_all <- read.csv("LULC-SIANG/pixel_count_merged/Landsat_All_classes_counts.csv")
+
+# Create a function to batch process all class files at once
+process_all_classes_batch <- function() {
+  
+  # Define all classes
+  all_classes <- c("AGR", "AJ", "BA", "BU", "CC", "MGR", "OF", "SH", "SN", "SS", "TF", "WA", "WRC")
+  
+  # Initialize results dataframes
+  sentinel_results <- data.frame(class = all_classes, UA = NA)
+  landsat_results <- data.frame(class = all_classes, UA = NA)
+  
+  # Process each class
+  for (class_name in all_classes) {
+    cat("\nProcessing class:", class_name, "\n")
+    
+    # Process Sentinel
+    sentinel_file <- paste0("class_", class_name, "_Sentinel_metrics_final.csv")
+    if (file.exists(sentinel_file)) {
+      sentinel_metrics <- read.csv(sentinel_file)
+      # Filter and calculate average
+      filtered_sentinel <- sentinel_metrics %>%
+        filter(modelName %in% sent_all$model_name)
+      
+      if (nrow(filtered_sentinel) > 0) {
+        sentinel_results$UA[sentinel_results$class == class_name] <- 
+          mean(filtered_sentinel$precision, na.rm = TRUE)
+        cat("  Sentinel: Found", nrow(filtered_sentinel), "models\n")
+      }
+    }
+    
+    # Process Landsat
+    landsat_file <- paste0("class_", class_name, "_Landsat_metrics_final.csv")
+    if (file.exists(landsat_file)) {
+      landsat_metrics <- read.csv(landsat_file)
+      # Filter and calculate average
+      filtered_landsat <- landsat_metrics %>%
+        filter(modelName %in% land_all$model_name)
+      
+      if (nrow(filtered_landsat) > 0) {
+        landsat_results$UA[landsat_results$class == class_name] <- 
+          mean(filtered_landsat$precision, na.rm = TRUE)
+        cat("  Landsat: Found", nrow(filtered_landsat), "models\n")
+      }
+    }
+  }
+  
+  # Save results
+  write.csv(sentinel_results, "UA_sentinel.csv", row.names = FALSE)
+  write.csv(landsat_results, "UA_landsat.csv", row.names = FALSE)
+  
+  return(list(sentinel = sentinel_results, landsat = landsat_results))
+}
+
+# Check if required objects exist
+
+if (!exists("sent_all")) {
+  stop("ERROR: sent_all object not found. Please load sent_all data.")
+}
+
+if (!exists("land_all")) {
+  stop("ERROR: land_all object not found. Please load land_all data.")
+}
+
+# Run the function
+cat("Starting batch processing...\n")
+results <- process_all_classes_batch()
+
+# View the results
+cat("\n\nFinal results stored in 'results' object:\n")
+cat("Access with: results$sentinel or results$landsat\n")
+
+results$sentinel
+results$landsat
