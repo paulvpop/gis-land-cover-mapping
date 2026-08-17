@@ -153,3 +153,254 @@ cat("Access with: results$sentinel or results$landsat\n")
 
 results$sentinel
 results$landsat
+
+### Using R
+
+# As the study area is composed of more than a million acres (10,674,943.042 acres 
+# i.e. 4,32,00,000,000 m2 i.e. 4,32,00 km2), and the number of classes is more than 
+# 12 (n = 13), as per the book  "Assessing the Accuracy of Remotely Sensed Data: Principles
+# and Practices, 2nd Edn",  the sample size per class should be between 75 to 100. So, in 
+# the following script, the minimum sample size per class will be kept as 75.
+
+# This section has been adapted and modified from 
+# https://github.com/davidfrantz/force/blob/main/rstats/force-sample-size.r
+
+# For Landsat:
+
+# Join the input tables containing pixel and user's accuracy data
+table_landsat <- results$landsat %>% 
+  inner_join(
+    pixels_landsat,
+    by = "class"
+  )
+
+# Check if join worked
+if (nrow(table_landsat) != nrow(pixels_landsat)){
+  exit_with_error("count and user_acc could not be joined")
+}
+
+# Make sure that the numbers are in the numeric form in the table:
+table_landsat <- table_landsat %>% 
+  mutate(UA = as.numeric(UA),
+         count = as.numeric(count)
+  )
+
+# Compute proportional area, standard deviation (S.D), and prop. are X S.D of UA
+table_landsat <- table_landsat %>%
+  mutate(area = count / sum(count)) %>%
+  mutate(stdev = sqrt(UA * (1 - UA))) %>%
+  mutate(areaXstdev = area * stdev)
+
+# Calculate the number of recommended samples 
+samples_landsat <- (sum(table_landsat$areaXstdev) / 0.01)**2 %>%
+  as.integer()
+
+sprintf("Suggested sample size: %d\n", samples_landsat) %>%
+  cat()
+# Suggested sample size: 1068
+
+# Compute class-wise sample size for equal and proportional allocation,
+# and add an empty row for potential compromise between the two types.
+table_landsat <- table_landsat %>%
+  mutate(equal = round(samples_landsat / nrow(table_landsat))) %>%
+  mutate(proportional = round(samples_landsat * area)) %>%
+  mutate(compromise = NA)
+
+# Check if there are enough samples in proportional allocation
+
+# Assign a minimum sample size per class
+min_size <- 75
+
+if (min(table_landsat$proportional) < min_size) {
+  
+  cat("Proportional allocation yields too few samples.\n")
+  cat("A compromise between equal and proportional allocation is recommended.\n")
+  
+  # First, assign minimum sample size to small classes
+  rare <- table_landsat %>% 
+    filter(proportional < min_size) %>% 
+    mutate(compromise = min_size)
+  
+  n_rare <- sum(rare$compromise)
+  
+  # Find out if the classes which have greater than minimum sample size are at 
+  # at least twice as big as the biggest small classes in the proportional
+  # column
+  
+  # Biggest small class
+  rare_max <- max(rare$proportional)
+  
+  # Create a column which shows the proportion of the count in proportional
+  # in relation to rare_max
+  table_landsat <- table_landsat %>%
+    mutate(prop_rare_max = proportional/rare_max)
+  
+  # Calculate the per strata/class sample size with the following logic.
+  # If greater than or equal to twice as big as biggest rare class (<=75) 
+  # i.e. >= 2.0 in the prop_rare_max, then multiply the big class numbers
+  # in the proportional column by 0.7 (taking 70%), but it should not fall 
+  # below 75. Then add this number in the compromise column.
+  
+  # Create the compromise column calculation
+  table_landsat <- table_landsat %>%
+    mutate(
+      compromise = case_when(
+        # If prop_rare_max >= 2.0 (twice as big as biggest rare class)
+        prop_rare_max >= 2.0 ~ {
+          # Calculate 70% of the proportional value
+          reduced_value = round(proportional * 0.7)
+          
+          # Ensure it doesn't fall below 75
+          ifelse(reduced_value < 75, 75, reduced_value)
+        },
+        prop_rare_max < 2.0 ~ 75,
+        # Otherwise, use the existing compromise value (75 for rare classes)
+        TRUE ~ compromise
+      )
+    )
+  
+  # View the result
+  print(table_landsat[, c("class", "equal", "proportional", "compromise")])
+  
+} else {
+  cat("Proportional allocation recommended.\n")
+}
+
+# New sample size:
+cat("Sample size estimated through a compromise approach:\n", sum(table_landsat$compromise))
+
+# Compute deviation of compromised allocation from proportional in percent
+table_landsat <- table_landsat %>%
+  mutate(deviation = (compromise - proportional) / proportional * 100)
+
+# Write the output
+write.csv(
+  table_landsat,
+  "sample-size-landsat.csv",
+  row.names = FALSE,
+  quote = FALSE
+)
+
+# OPTIONAL: Note that we can do the same for Sentinel, but it will likely be unfeasible
+# to collect the different sets of validation data for both Sentinel and Landsat.
+# So, only data for Landsat (comparatively higher numbers - as you will see next) 
+# need to be collected.
+
+# For Sentinel:
+
+# Join the input tables containing pixel and user's accuracy data
+table_sentinel <- results$sentinel %>% 
+  inner_join(
+    pixels_sentinel,
+    by = "class"
+  )
+
+# Check if the join worked
+if (nrow(table_sentinel) != nrow(pixels_sentinel)){
+  exit_with_error("count and user_acc could not be joined")
+}
+
+# Make sure that the numbers are in the numeric form in the table:
+table_sentinel <- table_sentinel %>% 
+  mutate(UA = as.numeric(UA),
+         count = as.numeric(count)
+  )
+
+# Compute proportional area, standard deviation (S.D), and prop. are X S.D of UA
+table_sentinel <- table_sentinel %>%
+  mutate(area = count / sum(count)) %>%
+  mutate(stdev = sqrt(UA * (1 - UA))) %>%
+  mutate(areaXstdev = area * stdev)
+
+# Calculate the number of recommended samples 
+samples_sentinel <- (sum(table_sentinel$areaXstdev) / 0.01)**2 %>%
+  as.integer()
+
+sprintf("Suggested sample size: %d\n", samples_sentinel) %>%
+  cat()
+
+# Note that the higher resolution Sentinel imagery results in lesser number of
+# validation data required than Landsat
+
+# Compute class-wise sample size for equal and proportional allocation,
+# and add an emoty row for potential compromise between the two types.
+table_sentinel <- table_sentinel %>%
+  mutate(equal = round(samples_sentinel / nrow(table_sentinel))) %>%
+  mutate(proportional = round(samples_sentinel * area)) %>%
+  mutate(compromise = NA)
+
+# Check if there are enough samples in proportional allocation
+
+# Assign a minimum sample size per class
+min_size <- 75
+
+if (min(table_sentinel$proportional) < min_size) {
+  
+  cat("Proportional allocation yields too few samples.\n")
+  cat("A compromise between equal and proportional allocation is recommended.\n")
+  
+  # First, assign minimum sample size to small classes
+  rare <- table_sentinel %>% 
+    filter(proportional < min_size) %>% 
+    mutate(compromise = min_size)
+  
+  n_rare <- sum(rare$compromise)
+  # Find out if the classes which have greater than minimum sample size are 
+  # at least twice as big as the biggest small classes in the proportional
+  # column
+  
+  # Biggest small class
+  rare_max <- max(rare$proportional)
+  
+  # Create a column which shows the proportion of the count in proportional
+  # in relation to rare_max
+  table_sentinel <- table_sentinel %>%
+    mutate(prop_rare_max = proportional/rare_max)
+  
+  # Calculate the per strata/class sample size with the following logic.
+  # If greater than or equal to twice as big as biggest rare class (<=75) 
+  # i.e. >= 2.0 in the prop_rare_max, then multiply the big class numbers
+  # in the proportional column by 0.7 (taking 70%), but it should not fall 
+  # below 75. Then add this number in the compromise column.
+  
+  # Create the compromise column calculation
+  table_sentinel <- table_sentinel %>%
+    mutate(
+      compromise = case_when(
+        # If prop_rare_max >= 2.0 (twice as big as biggest rare class)
+        prop_rare_max >= 2.0 ~ {
+          # Calculate 70% of the proportional value
+          reduced_value = round(proportional * 0.7)
+          
+          # Ensure it doesn't fall below 75
+          ifelse(reduced_value < 75, 75, reduced_value)
+        },
+        prop_rare_max < 2.0 ~ 75,
+        # Otherwise, use the existing compromise value (75 for rare classes)
+        TRUE ~ compromise
+      )
+    )
+  
+  # View the result
+  print(table_sentinel[, c("class", "equal", "proportional", "compromise")])
+  
+} else {
+  cat("Proportional allocation recommended.\n")
+}
+
+# New sample size:
+cat("Sample size estimated through a compromise approach:\n", sum(table_sentinel$compromise))
+
+# Still lower than that for Landsat
+
+# Compute deviation of compromised allocation from proportional in percent
+table_sentinel <- table_sentinel %>%
+  mutate(deviation = (compromise - proportional) / proportional * 100)
+
+# Write the output
+write.csv(
+  table,
+  "sample-size-sentinel.csv",
+  row.names = FALSE,
+  quote = FALSE
+)
