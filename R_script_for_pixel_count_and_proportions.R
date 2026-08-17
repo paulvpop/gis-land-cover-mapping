@@ -37,7 +37,7 @@
 # ignore this warning.
 
 # NOTE THAT THE EXAMPLE OUTPUTS OF THE CODE CAN BE FOUND IN THE ONLINE DOCUMENTATION OF
-# THIS SCRIPT: https://github.com/paulvpop/gis-land-cover-mapping/blob/main/12.%20Accuracy%20assessment.md
+# THIS SCRIPT: https://github.com/paulvpop/gis-land-cover-mapping/blob/main/12.%20Accuracy%20assessment.md#pixel-count-and-proportions
 
 # Set the working directory
 setwd("D:/RS_GIS_files/LULC-SIANG")
