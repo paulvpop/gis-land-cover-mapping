@@ -18,9 +18,7 @@ library(dplyr)
 sample_gpkg <- st_read("sample.gpkg")
 
 # Check the structure and first few rows if you want
-
 str(sample_gpkg)
-
 head(sample_gpkg)
 
 # The class labels are in the 'label_map' column
