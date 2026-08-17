@@ -698,7 +698,7 @@ cat("Loop completed! Saved the accuracy metrics of", sum(sapply(1:nrow(mod_det),
   input_dir <- file.path(mod_det$directory[i], mod_det$model_name[i])
   processed_dir <- file.path(input_dir, "processed")
   dir.exists(processed_dir)
-})), "out of", nrow(mod_det), "models (some models maybe go unprocessed if there is insufficient data)")
+})), "out of", nrow(mod_det), "models (some models may go unprocessed if there is insufficient data)")
 cat("\n", rep("=", 50), "\n\n", sep = "")
 
 # Close the sink (for the txt output)
