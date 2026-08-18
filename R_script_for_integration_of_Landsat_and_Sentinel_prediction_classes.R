@@ -333,4 +333,3 @@ if (exists("data_by_type") && "sentinel" %in% names(data_by_type)) {
 } else {
   cat("❌ No Sentinel data found\n")
 }
-```
