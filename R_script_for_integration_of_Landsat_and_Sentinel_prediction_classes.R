@@ -3,6 +3,9 @@
 # The following workflow can be used for created the integrated final maps for both the 
 # Sentinel and Landsat outputs.
 
+# NOTE THAT THE EXAMPLE OUTPUTS OF THE CODE CAN BE FOUND IN THE ONLINE DOCUMENTATION OF
+# THIS SECTION: https://github.com/paulvpop/gis-land-cover-mapping/blob/main/13.%20Integration.md#integration-of-landsat-and-sentinel-prediction-classes
+
 # Scenario 1 for necessary input for the integration:
 # From the object 'processed_data' (a list) from the earlier step, create an object
 # called 'data_by_type'. The processed_data is a list where each element is a ranked
