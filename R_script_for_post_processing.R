@@ -927,7 +927,7 @@ shp_vect <- vect(shp_reprojected)  # Convert to SpatVector for faster masking
 
 cat("Shapefile reprojection completed\n")
 
-# Modified function with better path handling
+# Function to carry out post-processing with the use of virtual raster tiles
 process_with_vrt <- function(model_name) {
   
   # Find the model info
