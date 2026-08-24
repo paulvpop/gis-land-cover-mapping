@@ -6,7 +6,8 @@
 # accuracy assessment cane be used here.
 
 # For the workflow involving non-post-processed imagery (last section of the Post processing section), 
-# run the script AFTER making the changes where the comments start with # Unchanged workflow
+# run the script AFTER changing the working directory to where the unchanged models are located - 
+# like Top_Models_Unchanged_Organized
 
 # NOTE THAT THE EXAMPLE OUTPUTS OF THE CODE CAN BE FOUND IN THE ONLINE DOCUMENTATION OF
 # THIS SCRIPT: https://github.com/paulvpop/gis-land-cover-mapping/blob/main/13.%20Integration.md#ranking-the-classes
