@@ -6,6 +6,9 @@
 # NOTE THAT THE EXAMPLE OUTPUTS OF THE CODE CAN BE FOUND IN THE ONLINE DOCUMENTATION OF
 # THIS SCRIPT: https://github.com/paulvpop/gis-land-cover-mapping/blob/main/12.%20Accuracy%20assessment.md#statistics-aggregation-of-accuracy-assessment
 
+# For the workflow involving non-post-processed imagery (last section of the Post processing
+# section), run the script AFTER making the changes where the comments start with # Unchanged workflow
+
 # Set the broader working directory where you want the output of this section to be 
 # saved.
 setwd("D:/GIS")
@@ -28,7 +31,7 @@ cat("Number of valid directories in the system:", nrow(mod_det_fixed), "\n")
 # of the classes has zero prediction pixels even though they should be in the 
 # output. Then this file is saved.
 valid_accuracy_data <- mod_det_fixed %>%
-  mutate(file_path = file.path(directory, model_name, "processed", 
+  mutate(file_path = file.path(directory, model_name, "processed",  # Unchanged workflow: change "processed" to "unchanged"
                                paste0("accuracy_metrics_", model_name, ".csv"))) %>%
   filter(file.exists(file_path)) %>%
   mutate(accuracy_data = map2(file_path, satellite, ~{
@@ -44,6 +47,7 @@ valid_accuracy_data <- mod_det_fixed %>%
   bind_rows()
 
 write.csv(valid_accuracy_data, "accuracy_data_for_all_valid_models.csv")
+# Unchanged workflow: change "accuracy_data_for_all_valid_models.csv" to "accuracy_data_for_all_valid_unchanged_models.csv"
 
 # Function to add rankings for each class
 add_rankings <- function(data) {
@@ -88,7 +92,7 @@ valid_accuracy_data %>%
       
       safe_satellite <- gsub("/", "_", satellite_name)
       safe_class <- gsub("/", "_", class_name)
-      filename <- paste0("class_", safe_class, "_", safe_satellite, "_metrics.csv")
+      filename <- paste0("class_", safe_class, "_", safe_satellite, "_metrics.csv") # Unchanged workflow: change "_metrics.csv" to "_metrics_unchanged.csv"
       write.csv(ranked_data, filename, row.names = FALSE)
       
       cat("Created: ", filename, " with ", nrow(ranked_data), " models\n", sep = "")
@@ -107,6 +111,9 @@ main_folder <- "D:/GIS/LULC-SIANG"  # Replace with your actual path
 # Define the system folders
 system_folders <- c("accuracy_metrics_aggregation_linux", 
                     "accuracy_metrics_aggregation_windows")
+
+# Unchanged workflow: change "accuracy_metrics_aggregation_linux" to "accuracy_metrics_aggregation_unchanged_linux"
+# and change "accuracy_metrics_aggregation_windows" to "accuracy_metrics_aggregation_unchanged_windows"
 
 # Get all unique CSV files across both system folders
 all_csv_files <- system_folders %>%
@@ -151,6 +158,7 @@ all_data <- system_folders %>%
     if (dir.exists(folder_path)) {
       # Get all class-satellite CSV files
       csv_files <- list.files(folder_path, pattern = "class_.*_metrics\\.csv$", full.names = TRUE)
+# Unchanged workflow: change "class_.*_metrics\\.csv$" to "class_.*_metrics_unchanged\\.csv$"
       if (length(csv_files) > 0) {
         map_dfr(csv_files, ~ read.csv(.x))
       }
@@ -175,6 +183,7 @@ all_data %>%
       safe_satellite <- gsub("/", "_", satellite_name)
       safe_class <- gsub("/", "_", class_name)
       filename <- paste0("class_", safe_class, "_", safe_satellite, "_metrics_final.csv")
+# Unchanged workflow: change "_metrics_final.csv" to "_metrics_unchanged_final.csv"
       
       write.csv(ranked_data, filename, row.names = FALSE)
       cat("Created: ", filename, " with ", nrow(ranked_data), " models\n", sep = "")
