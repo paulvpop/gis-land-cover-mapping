@@ -5,6 +5,9 @@
 # integration). The same function used in the statistics aggregation step of 
 # accuracy assessment cane be used here.
 
+# For the workflow involving non-post-processed imagery (last section of the Post processing section), 
+# run the script AFTER making the changes where the comments start with # Unchanged workflow
+
 # NOTE THAT THE EXAMPLE OUTPUTS OF THE CODE CAN BE FOUND IN THE ONLINE DOCUMENTATION OF
 # THIS SCRIPT: https://github.com/paulvpop/gis-land-cover-mapping/blob/main/13.%20Integration.md#ranking-the-classes
 
