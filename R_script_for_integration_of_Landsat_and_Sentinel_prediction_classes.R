@@ -268,12 +268,12 @@ if (exists("data_by_type") && "landsat" %in% names(data_by_type)) {
   landsat_result <- create_ranked_composite(
     data_by_type[["landsat"]], 
     "Landsat", 
-    "Top_Models_Organized"
+    "Top_Models_Organized"  # Unchanged workflow: change "Top_Models_Organized" to "Top_Models_Unchanged_Organized"
   )
   
   # Save the composite
   if (!is.null(landsat_result$raster)) {
-    output_file <- "Top_Models_Organized/Landsat_ranked_composite.tif"
+    output_file <- "Top_Models_Organized/Landsat_ranked_composite.tif" # Unchanged workflow: change Top_Models_Organized to Top_Models_Unchanged_Organized
     
     # Write using terra
     writeRaster(
@@ -289,7 +289,7 @@ if (exists("data_by_type") && "landsat" %in% names(data_by_type)) {
     # Also save the mapping
     write.csv(
       landsat_result$value_to_class,
-      "Top_Models_Organized/Landsat_value_to_class.csv",
+      "Top_Models_Organized/Landsat_value_to_class.csv",  # Unchanged workflow: change Top_Models_Organized to Top_Models_Unchanged_Organized
       row.names = FALSE
     )
     cat("✅ Saved value-to-class mapping\n")
@@ -308,11 +308,11 @@ if (exists("data_by_type") && "sentinel" %in% names(data_by_type)) {
   sentinel_result <- create_ranked_composite(
     data_by_type[["sentinel"]], 
     "Sentinel", 
-    "Top_Models_Organized"
+    "Top_Models_Organized"  # Unchanged workflow: change "Top_Models_Organized" to "Top_Models_Unchanged_Organized"
   )
   
   if (!is.null(sentinel_result$raster)) {
-    output_file <- "Top_Models_Organized/Sentinel_ranked_composite.tif"
+    output_file <- "Top_Models_Organized/Sentinel_ranked_composite.tif" # Unchanged workflow: change Top_Models_Organized to Top_Models_Unchanged_Organized
     
     writeRaster(
       sentinel_result$raster,
@@ -326,7 +326,7 @@ if (exists("data_by_type") && "sentinel" %in% names(data_by_type)) {
     
     write.csv(
       sentinel_result$value_to_class,
-      "Top_Models_Organized/Sentinel_value_to_class.csv",
+      "Top_Models_Organized/Sentinel_value_to_class.csv", # Unchanged workflow: change Top_Models_Organized to Top_Models_Unchanged_Organized
       row.names = FALSE
     )
     
