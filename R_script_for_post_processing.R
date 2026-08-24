@@ -1252,3 +1252,187 @@ sink()
 #Processing model: dir_ml_SVC_21 
 #Directory: /home/GIS/force/dir_ml_SVC_21  
 #⚠ Completed with warnings: dir_ml_SVC_21 
+
+## Bulk merging of unchanged model outputs
+
+# In case the accuracy of the post-processed outputs needs to be compared to the unchanged model outputs,
+# the outputs of the models can be merged (from their data cube form) and use for accuracy assessement.
+# This is also important if you require final output i.e. the integrated map to be gap-free. In this case,
+# the unchanged models can themselves be integrated after accuracy assessment. 
+
+# For the bulk processing/merging of the unchanged rasters without post-processing, the following function
+# can be used.
+
+# NOTE: the following objects from the previous section must already exist in the environment:
+# mod_det, class_mapping, and shp_vect
+
+# To start logging command outputs into a textfile "unchanged_processing_output.txt"
+sink("unchanged_processing_output.txt", split = TRUE)
+
+# Function to process classes with clipping/reprojection but WITHOUT result_raster masking
+process_with_vrt_no_mask <- function(model_name) {
+  
+  # Find the model info
+  model_info <- mod_det[mod_det$model_name == model_name, ]
+  
+  if (nrow(model_info) == 0) {
+    stop(paste("Model", model_name, "not found in mod_det"))
+  }
+  
+  # Use the directory path directly from mod_det
+  dir_path <- paste0(model_info$directory, "/", model_name)
+  # Clean path separators if needed
+  dir_path <- gsub("\\\\", "/", dir_path)
+  dir_path <- gsub("//", "/", dir_path)
+  
+  cat("Processing model:", model_name, "\n")
+  cat("Directory:", dir_path, "\n")
+  
+  # Check if directory exists
+  if (!dir.exists(dir_path)) {
+    warning("Directory does not exist: ", dir_path)
+    return(FALSE)
+  }
+  
+  # Create VRT - search in the specific model directory
+  mlp_files <- list.files(dir_path, pattern = "PREDICTION_HL_ML_MLP\\.tif$", 
+                          recursive = TRUE, full.names = TRUE)
+  
+  print(paste("Found", length(mlp_files), "PREDICTION_HL_ML_MLP.tif files"))
+  
+  if (length(mlp_files) == 0) {
+    warning("No MLP files found for model: ", model_name, " in ", dir_path)
+    return(FALSE)
+  }
+  
+  # Read the first file to get original band names
+  first_raster <- rast(mlp_files[1])
+  original_band_names <- names(first_raster)
+  
+  print("Original band names:")
+  print(original_band_names)
+  
+  # Create the virtual raster tile
+  cat("Creating VRT from", length(mlp_files), "MLP files...\n")
+  vrt_file <- file.path(dir_path, "merged_mosaic.vrt")
+  mosaic_vrt <- vrt(mlp_files, vrt_file, overwrite = TRUE)
+  
+  # Apply original band names to the VRT
+  names(mosaic_vrt) <- original_band_names
+  
+  print("VRT band names after renaming:")
+  print(names(mosaic_vrt))
+  
+  # Vectorized renaming
+  current_names <- names(mosaic_vrt)
+  new_names <- ifelse(current_names %in% names(class_mapping),
+                      class_mapping[current_names],
+                      current_names)
+  
+  names(mosaic_vrt) <- new_names
+  
+  print("VRT band names after class mapping:")
+  print(names(mosaic_vrt))
+  
+  # Setup output directory - create it within the model's directory
+  output_dir <- file.path(dir_path, "unchanged")
+  # Use normalizePath for consistent path handling:
+  output_dir <- normalizePath(output_dir, winslash = "/", mustWork = FALSE)
+  
+  # Create directory
+  if (!dir.exists(output_dir)) {
+    dir.create(output_dir, recursive = TRUE, showWarnings = TRUE)
+    if (dir.exists(output_dir)) {
+      cat("Created directory:", output_dir, "\n")
+    } else {
+      warning("Failed to create directory: ", output_dir)
+      return(FALSE)
+    }
+  } else {
+    cat("Directory exists:", output_dir, "\n")
+  }
+  
+  # Process each band from the VRT directly
+  for (class_name in names(mosaic_vrt)) {
+    cat("Processing class:", class_name, "...\n")
+    
+    # Check if output file already exists AND is valid
+    output_file <- file.path(output_dir, paste0(class_name, "_unchanged.tif"))
+    if (file.exists(output_file)) {
+      # Additional check: does it have valid data?
+      tryCatch({
+        test_raster <- rast(output_file)
+        # Check if it has any non-zero values
+        non_zero <- global(test_raster, function(x) sum(x > 0, na.rm = TRUE))[1,1]
+        if (non_zero > 0) {
+          cat("Valid processed file exists, skipping:", class_name, "\n")
+          next
+        } else {
+          cat("File exists but contains no data, reprocessing:", class_name, "\n")
+        }
+      }, error = function(e) {
+        cat("File exists but cannot be read, reprocessing:", class_name, "\n")
+      })
+    }
+    
+    tryCatch({
+      # Get the input raster from VRT
+      r <- mosaic_vrt[[class_name]]
+      
+      # Replace NAs with 0
+      r[is.na(r)] <- 0
+      
+      # Clip to shapefile (reprojection happens automatically via mask)
+      r_cropped <- mask(r, shp_vect)
+      
+      # Check non-zero values
+      non_zero_count <- global(!is.na(r_cropped) & r_cropped > 0, "sum", na.rm = TRUE)[1,1]
+      cat("Non-zero pixels in", class_name, ":", non_zero_count, "\n")
+      
+      # Save output
+      output_file <- file.path(output_dir, paste0(class_name, "_unchanged.tif"))
+      writeRaster(
+        r_cropped,
+        filename = output_file,
+        datatype = "INT2S",
+        NAflag = -9999,
+        gdal = c("COMPRESS=DEFLATE", "TFW=YES"),
+        overwrite = TRUE
+      )
+      
+      cat("Successfully processed", class_name, "\n")
+      
+      # Clean up
+      rm(r, r_cropped)
+      gc()
+      
+    }, error = function(e) {
+      cat("Error processing", class_name, ":", e$message, "\n")
+    })
+  }
+  
+  #cat("✓ Completed processing for", model_name, "\n")
+  return(TRUE)
+}
+
+# Run for all models
+for (i in 1:nrow(mod_det)) {
+  model_name <- mod_det$model_name[i]
+  cat("\n", rep("=", 50), "\n", sep = "")
+  cat("Processing model", i, "of", nrow(mod_det), ":", model_name, "\n")
+  cat(rep("=", 50), "\n\n", sep = "")
+  
+  tryCatch({
+    success <- process_with_vrt_no_mask(model_name)
+    if (success) {
+      cat("✓ Successfully completed", model_name, "\n")
+    } else {
+      cat("⚠ Completed with warnings:", model_name, "\n")
+    }
+  }, error = function(e) {
+    cat("✗ Failed to process", model_name, ":", e$message, "\n")
+  })
+}
+
+# Close the sink
+sink()
