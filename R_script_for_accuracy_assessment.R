@@ -17,6 +17,9 @@ print("This will appear in the console and be saved to output.txt")
 # can be visibly seen by a human, instead of exactly at the point, then it can be
 # considered as accurately predicted/classified.
 
+# For the workflow involving non-post-processed imagery (last section of the Post processing
+# section), run the script AFTER making the changes where the comments start with # Unchanged workflow
+
 # Load necessary packages:
 library(dplyr)
 library(terra)
@@ -85,7 +88,7 @@ for (i in 1:nrow(mod_det)) {
   # Set input directory (where the raster files which has undergone post-processing
   # is located):
   input_dir <- file.path(base_directory, model_name)
-  processed_dir <- file.path(input_dir, "processed")
+  processed_dir <- file.path(input_dir, "processed") # Unchanged workflow: change "processed" to "unchanged"
  
   # Check if directory exists and is accessible
   if (!dir.exists(processed_dir)) {
@@ -112,7 +115,7 @@ for (i in 1:nrow(mod_det)) {
  
   # Get list of all processed TIFF files (with capital name abbreviations and the
   # _processed suffix)
-  tif_files <- list.files(getwd(), pattern = "_processed\\.tif$", full.names = TRUE)
+  tif_files <- list.files(getwd(), pattern = "_processed\\.tif$", full.names = TRUE) # Unchanged workflow: change "processed" to "unchanged"
  
   # Check if any TIFF files were found
   if (length(tif_files) == 0) {
@@ -285,7 +288,7 @@ for (i in 1:nrow(mod_det)) {
  
   # Process buffers for potential class replacements
   for (tif_file in tif_files) {
-    var_name <- sub("_processed\\.tif$", "", basename(tif_file))
+    var_name <- sub("_processed\\.tif$", "", basename(tif_file)) # Unchanged workflow: change _processed to _unchanged
    
     # Skip if this class was removed due to zero predictions
     if (!var_name %in% class_names) {
@@ -696,7 +699,7 @@ for (i in 1:nrow(mod_det)) {
 cat("\n", rep("=", 50), "\n", sep = "")
 cat("Loop completed! Saved the accuracy metrics of", sum(sapply(1:nrow(mod_det), function(i) {
   input_dir <- file.path(mod_det$directory[i], mod_det$model_name[i])
-  processed_dir <- file.path(input_dir, "processed")
+  processed_dir <- file.path(input_dir, "processed")  # Unchanged workflow: change "processed" to "unchanged"
   dir.exists(processed_dir)
 })), "out of", nrow(mod_det), "models (some models may go unprocessed if there is insufficient data)")
 cat("\n", rep("=", 50), "\n\n", sep = "")
