@@ -112,11 +112,11 @@ find_raster_files <- function(folder_path, class_name, actual_class) {
   
   # Try different naming patterns in order of preference
   patterns <- c(
-    paste0("^", actual_class, "_processed\\.(tif|tfw)$"),
-    paste0("^", class_name, "_processed\\.(tif|tfw)$"),
-    paste0(".*", actual_class, ".*_processed\\.(tif|tfw)$"),
-    paste0(".*", class_name, ".*_processed\\.(tif|tfw)$"),
-    "_processed\\.(tif|tfw)$"
+    paste0("^", actual_class, "_processed\\.(tif|tfw)$"), # Unchanged workflow: change _processed to _unchanged
+    paste0("^", class_name, "_processed\\.(tif|tfw)$"), # Unchanged workflow: change _processed to _unchanged
+    paste0(".*", actual_class, ".*_processed\\.(tif|tfw)$"), # Unchanged workflow: change _processed to _unchanged
+    paste0(".*", class_name, ".*_processed\\.(tif|tfw)$"), # Unchanged workflow: change _processed to _unchanged
+    "_processed\\.(tif|tfw)$" # Unchanged workflow: change _processed to _unchanged
   )
   
   for (pattern in patterns) {
@@ -217,11 +217,11 @@ get_top_model_info <- function(csv_file, mod_det_df) {
   cat("  Using folder:", model_folder_path, "\n")
   
   # Now look for the processed folder
-  processed_folder_path <- file.path(model_folder_path, "processed")
+  processed_folder_path <- file.path(model_folder_path, "processed")  # Unchanged workflow: change "processed" to "unchanged"
   
-  # Check if processed folder exists
+  # Check if processed folder exists  # Unchanged workflow: change processed to unchanged
   if (!dir.exists(processed_folder_path)) {
-    cat("  'processed' folder not found in model folder. Checking for files directly in model folder...\n")
+    cat("  'processed' folder not found in model folder. Checking for files directly in model folder...\n") # Unchanged workflow: change processed to unchanged
     # Try the model folder itself
     processed_folder_path <- model_folder_path
   }
@@ -260,7 +260,7 @@ organize_top_model_rasters <- function(mod_det_path, metrics_folder) {
   # Find all metrics files
   metrics_files <- list.files(
     path = metrics_folder,
-    pattern = "class_.*_metrics_final\\.csv$",
+    pattern = "class_.*_metrics_final\\.csv$", # Unchanged workflow: change _metrics_final to _metrics_unchanged_final
     full.names = TRUE
   )
   
@@ -280,7 +280,7 @@ organize_top_model_rasters <- function(mod_det_path, metrics_folder) {
   cat("Processing", length(metrics_files), "files after filtering\n\n")
   
   # Create output folders for Landsat and Sentinel
-  output_base <- file.path(metrics_folder, "Top_Models_Organized")
+  output_base <- file.path(metrics_folder, "Top_Models_Organized") # Unchanged workflow: change Top_Models_Organized to Top_Models_Unchanged_Organized 
   landsat_folder <- file.path(output_base, "Landsat")
   sentinel_folder <- file.path(output_base, "Sentinel")
   
@@ -542,7 +542,7 @@ mod_det_path <- "D:/GIS/model_details_updated.csv"
 # Set the directory containing all the "class_OF_Landsat_metrics_final.csv", 
 # "class_SN_Sentinel_metrics_final.csv" etc as metrics_folder. The dot in the next
 # line of code refers to the current directory.
-metrics_folder <- "./metrics_files" 
+metrics_folder <- "./metrics_files" # Unchanged workflow: change metrics_files to metrics_unchanged_files after placing the respective files there
 
 # Run the main function
 result <- organize_top_model_rasters(mod_det_path, metrics_folder)
