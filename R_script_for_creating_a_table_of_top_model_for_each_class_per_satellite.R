@@ -3,6 +3,9 @@
 # NOTE THAT THE EXAMPLE OUTPUTS OF THE CODE CAN BE FOUND IN THE ONLINE DOCUMENTATION OF
 # THIS SCRIPT: https://github.com/paulvpop/gis-land-cover-mapping/blob/main/13.%20Integration.md#create-a-table-of-top-models-for-each-class-per-satellite
 
+# For the workflow involving non-post-processed imagery (last section of the Post processing section), 
+# run the script AFTER making the changes where the comments start with # Unchanged workflow
+
 # Set input directory (to where the model details csv is located) if you
 # already don't have it in the R environment (from the Accuracy Assessment
 # section). This time, the model_details.csv files should have the details
