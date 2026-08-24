@@ -6,6 +6,9 @@
 # NOTE THAT THE EXAMPLE OUTPUTS OF THE CODE CAN BE FOUND IN THE ONLINE DOCUMENTATION OF
 # THIS SECTION: https://github.com/paulvpop/gis-land-cover-mapping/blob/main/13.%20Integration.md#integration-of-landsat-and-sentinel-prediction-classes
 
+# For the workflow involving non-post-processed imagery (last section of the Post processing section), 
+# run the script AFTER making the changes where the comments start with # Unchanged workflow
+
 # Scenario 1 for necessary input for the integration:
 # From the object 'processed_data' (a list) from the earlier step, create an object
 # called 'data_by_type'. The processed_data is a list where each element is a ranked
@@ -49,10 +52,10 @@ create_data_by_type_from_files <- function() {
   
   # If not found, check in Top_Models_Organized directory
   if (length(landsat_file) == 0) {
-    landsat_file <- "Top_Models_Organized/top_models_landsat_ranked.csv"
+    landsat_file <- "Top_Models_Organized/top_models_landsat_ranked.csv" # Unchanged workflow: change Top_Models_Organized to Top_Models_Unchanged_Organized
   }
   if (length(sentinel_file) == 0) {
-    sentinel_file <- "Top_Models_Organized/top_models_sentinel_ranked.csv"
+    sentinel_file <- "Top_Models_Organized/top_models_sentinel_ranked.csv" # Unchanged workflow: change Top_Models_Organized to Top_Models_Unchanged_Organized
   }
   
   # Load Landsat data
@@ -80,6 +83,7 @@ data_by_type <- create_data_by_type_from_files()
 # Define the function to create the ranked composite
 create_ranked_composite <- function(ranked_data, data_type = "Landsat", 
                                     base_dir = "Top_Models_Organized") {
+# Unchanged workflow: change Top_Models_Organized to Top_Models_Unchanged_Organized
   
   # Use terra instead of raster (more modern and handles paths better)
   library(terra)
